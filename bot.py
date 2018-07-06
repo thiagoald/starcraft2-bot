@@ -33,9 +33,11 @@ class GatheringRole(Role):
             await bot.do(self.agent.gather(closest_mineral))
         elif self.state == 'gathering':
             if self.enemy_close(bot):
-                set_trace()
-                place_idx = randint(1, len(bot.enemy_start_locations))
-                await bot.do(self.agent.move(bot.enemy_start_locations[place_idx]))
+                place_idx = randint(0, len(bot.state.mineral_field))
+                await bot.do(self.agent.move(bot.state.mineral_field[place_idx]))
+                self.state = 'fleeing'
+        elif self.state == 'fleeing':
+            pass
 
 # class BuildingRole(Role):
 #     def __init__(self, agent, id_):
