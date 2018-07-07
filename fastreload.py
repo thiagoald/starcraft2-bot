@@ -10,6 +10,12 @@ from bot import SimpleBot
 from sc2 import Race, Difficulty
 from sc2.player import Bot, Computer
 
+class WorkerRushBot(sc2.BotAI):
+    async def on_step(self, iteration):
+        if iteration == 0:
+            for worker in self.workers:
+                await self.do(worker.attack(self.enemy_start_locations[0]))
+
 def main():
     player_config = [
         Bot(Race.Terran, SimpleBot()),
@@ -19,7 +25,7 @@ def main():
     gen = sc2.main._host_game_iter(
         sc2.maps.get("Abyssal Reef LE"),
         player_config,
-        realtime=False
+        realtime=True
     )
 
     while True:
