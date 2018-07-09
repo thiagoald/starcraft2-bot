@@ -34,9 +34,7 @@ async def find_place_to_build(bot,
         if buildings_close is not None:
             pos_near = []
             for building in buildings_close:
-                pos_near.append(bot.units(building).closest_to(agent).position)
-            print(pos_near)
-            set_trace()
+                pos_near.append(bot.units(building).closest_to(agent.position).position)
             pos_near = pos_near[0]
         elif position_close is not None:
             pos_near = position_close
@@ -74,7 +72,7 @@ class GatherRole(Role):
         if self.state == 'slave':
             pass
         elif self.state == 'finding_closest_mineral':
-            closest_mineral = bot.state.mineral_field.closest_to(self.agent)
+            closest_mineral = bot.state.mineral_field.closest_to(self.agent.position)
             self.state = 'gathering'
             await bot.do(self.agent.gather(closest_mineral))
         elif self.state == 'gathering':
@@ -133,7 +131,7 @@ class BuildRole(Role):
                     await self.build_ramp_depots(bot)
                 else:
                     print('Looking for a place to build SD')
-                    pos = await find_place_to_build(bot, self.agent, SUPPLYDEPOT, buildings_close=[SUPPLYDEPOT, SUPPLYDEPOTLOWERED])
+                    pos = await find_place_to_build(bot, self.agent, SUPPLYDEPOT, position_close=bot.units(SUPPLYDEPOTLOWERED).closest_to(self.agent.position).position)
                     print(pos)
                     await bot.do(self.agent.build(SUPPLYDEPOT, pos))
                 print('Orders:')
@@ -144,18 +142,18 @@ class BuildRole(Role):
                 print('Not ready to build!')
         elif self.state == 'finishing_supply_depot':
             print('Build progress: {}', bot.units(
-                SUPPLYDEPOT).closest_to(self.agent).build_progress)
-            if bot.units(SUPPLYDEPOT).closest_to(self.agent).build_progress == 1.0:
+                SUPPLYDEPOT).closest_to(self.agent.position).build_progress)
+            if bot.units(SUPPLYDEPOT).closest_to(self.agent.position).build_progress == 1.0:
                 print('Finished!')
                 self.state = 'building_supply_depot'
         elif self.state == 'building_barracks':
             if self.ready_to_build(AbilityId.TERRANBUILD_BARRACKS) and bot.can_afford(BARRACKS):
                 if len(bot.units(BARRACKS)) == 0:
                     print('build barracks')
-                    pos = await bot.find_placement(BARRACKS, near=bot.units(COMMANDCENTER).closest_to(self.agent).position)
+                    pos = await bot.find_placement(BARRACKS, near=bot.units(COMMANDCENTER).closest_to(self.agent.position).position)
                     await bot.do(self.agent.build(BARRACKS, pos))
                 else:
-                    pos = await bot.find_placement(BARRACKS, near=bot.units(BARRACKS).closest_to(self.agent).position)
+                    pos = await bot.find_placement(BARRACKS, near=bot.units(BARRACKS).closest_to(self.agent.position).position)
                     await bot.do(self.agent.build(BARRACKS, pos))
                 print('Orders:')
                 print(self.agent.orders)
@@ -163,8 +161,8 @@ class BuildRole(Role):
                     self.state = 'finishing_barracks'
         elif self.state == 'finishing_barracks':
             print('Build progress: {}', bot.units(
-                BARRACKS).closest_to(self.agent).build_progress)
-            if bot.units(BARRACKS).closest_to(self.agent).build_progress == 1.0:
+                BARRACKS).closest_to(self.agent.position).build_progress)
+            if bot.units(BARRACKS).closest_to(self.agent.position).build_progress == 1.0:
                 print('Finished!')
                 self.state = 'building_barracks'
 
